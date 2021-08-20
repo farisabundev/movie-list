@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Col, Row, Typography } from "antd";
 import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { Col, Row, Typography, Modal } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { setMovies } from "./config/reducers/movies";
 
@@ -17,10 +17,15 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [loadMore, setLoadMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPoster, setSelectedPoster] = useState(null);
 
   // redux
   const dispatch = useDispatch();
   const movies = useSelector((state) => state.movies.movies);
+
+  useEffect(() => {
+    console.log(selectedPoster);
+  }, [selectedPoster]);
 
   // refs
   const layoutRef = useRef();
@@ -33,7 +38,7 @@ const App = () => {
   const loadMovies = async () => {
     try {
       setIsLoading(true);
-      setMovies([])
+      setMovies([]);
       let params = {
         apikey: "faf7e5bb",
         r: "json",
@@ -57,54 +62,55 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    function updateScrollPosition() {
-      console.log("scroll");
-    }
+  const handlePosterImage = (val) => {
+    setSelectedPoster(val);
+    dispatch(showModal());
+  };
 
-    console.log(layoutRef);
-
-    if (layoutRef && layoutRef.current) {
-      layoutRef.current.addEventListener("scroll", updateScrollPosition, false);
-      return function cleanup() {
-        layoutRef.current.removeEventListener(
-          "scroll",
-          updateScrollPosition,
-          false
-        );
-      };
-    }
-  }, []);
+  console.log();
 
   return (
-    <div ref={layoutRef}>
-      <Layout>
-        <Row align="middle" justify="space-between">
-          <Col span={12}>
-            <Typography.Title>OMDb Movie List</Typography.Title>
-          </Col>
-          <Col span={12}>
-            <SearchInput
-              justify="end"
-              onChange={(e) => setSearchKey(e.target.value)}
-              onButtonSubmit={loadMovies}
-            />
-          </Col>
-        </Row>
-
-        {!movies.length ? (
-          <></>
-        ) : (
-          <Row gutter={[16, 16]}>
-            {movies.map((each, i) => (
-              <Col span={24} key={i}>
-                <MovieCard data={each} />
-              </Col>
-            ))}
+    <>
+      <Modal
+        visible={selectedPoster !== null}
+        onCancel={() => setSelectedPoster(null)}
+        title={null}
+        footer={null}
+      >
+        <img src={selectedPoster?.Poster} />
+      </Modal>
+      <div ref={layoutRef}>
+        <Layout>
+          <Row align="middle" justify="space-between">
+            <Col span={12}>
+              <Typography.Title>OMDb Movie List</Typography.Title>
+            </Col>
+            <Col span={12}>
+              <SearchInput
+                justify="end"
+                onChange={(e) => setSearchKey(e.target.value)}
+                onButtonSubmit={loadMovies}
+              />
+            </Col>
           </Row>
-        )}
-      </Layout>
-    </div>
+
+          {!movies.length ? (
+            <></>
+          ) : (
+            <Row gutter={[16, 16]}>
+              {movies.map((each, i) => (
+                <Col span={24} key={i}>
+                  <MovieCard
+                    data={each}
+                    handlePosterImage={(val) => handlePosterImage(val)}
+                  />
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Layout>
+      </div>
+    </>
   );
 };
 

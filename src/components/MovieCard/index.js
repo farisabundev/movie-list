@@ -1,15 +1,21 @@
-import { Typography, Image, Row, Col } from "antd";
-import React from "react";
+import { Typography, Row, Col } from "antd";
+import React, { useEffect } from "react";
 
 import imageError from "../../assets/image-not-found.png";
 
-const MovieCard = ({ data }) => {
+const MovieCard = ({ data, handlePosterImage }) => {
   const { Poster, Title, Year } = data;
 
   return (
     <Row className="movie-card" gutter={30}>
       <Col sm={{ span: 24 }} md={{ span: 3 }}>
-        <Image src={Poster} alt={Title} fallback={imageError} />
+        <img
+					className="movie-poster"
+          src={Poster}
+          alt={Title}
+          onError={(e) => (e.target.src = imageError)}
+					onClick={() => handlePosterImage(data)}
+        />
       </Col>
       <Col
         sm={{ span: 24 }}
