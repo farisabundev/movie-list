@@ -1,8 +1,22 @@
+$breakpoint: 768px;
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: "Montserrat", sans-serif;
+}
+
+body {
+  color: white !important;
+  background-color: #2C394B !important;
+}
+.ant-typography {
+  color: white !important;
+}
+
+.text-center {
+  text-align: center !important;
 }
 
 .d-flex {
@@ -20,24 +34,54 @@
 }
 
 .movie-list-wrapper {
-  padding-top: 15px;
+  padding: 30px 0;
   min-height: 100vh;
 
+  .centered-div {
+    margin: -30px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
   .movie-card {
+    .movie-poster {
+      width: 100%;
+      height: 166px;
+      object-fit: cover;
+
+      &:hover {
+        cursor: pointer;
+        box-shadow: 5px 5px 10px rgba(48, 56, 65, 0.2);
+      }
+    }
     .movie-card_information {
       text-align: center;
       display: flex;
       align-items: center;
+
+      .movie-title {
+        font-weight: bold;
+
+        @media screen and (max-width: $breakpoint) {
+          font-size: 18px;
+        }
+        @media screen and (min-width: $breakpoint) {
+          font-size: 24;
+        }
+      }
     }
   }
 }
 
 // override
-.ant-image-preview-mask {
-  background-color: rgba(black, .9) !important;
+.ant-modal-content {
+  text-align: center;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ant-modal-body {
+  padding: 0 !important;
 }
 
-.ant-image-preview-operations-operation:not(:first-child),
-.ant-image-preview-operations {
-  display: none !important;
-}
