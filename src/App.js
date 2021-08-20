@@ -8,110 +8,129 @@ import baseURL from "./config/baseURL";
 
 import "./App.scss";
 
+import LandingPage from "./components/LandingPage";
 import Layout from "./components/Layout";
-import SearchInput from "./components/SearchInput";
-import MovieCard from "./components/MovieCard";
+import InfiniteScroll from "./components/InfiniteScroll";
+import EmptyState from "./components/EmptyState";
 
 const App = () => {
-  const [searchKey, setSearchKey] = useState("batman");
-  const [page, setPage] = useState(1);
-  const [loadMore, setLoadMore] = useState(false);
+  const [searchKey, setSearchKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [params, setParams] = useState({
+    apikey: "faf7e5bb",
+    r: "json",
+    page: 1,
+  });
   const [selectedPoster, setSelectedPoster] = useState(null);
+  const [viewComponent, setViewComponent] = useState("INIT_PAGE");
 
   // redux
   const dispatch = useDispatch();
   const movies = useSelector((state) => state.movies.movies);
 
-  useEffect(() => {
-    console.log(selectedPoster);
-  }, [selectedPoster]);
-
   // refs
   const layoutRef = useRef();
 
   useEffect(() => {
-    setLoadMore(false);
     loadMovies();
-  }, [loadMore]);
+  }, [params]);
 
   const loadMovies = async () => {
     try {
-      setIsLoading(true);
-      setMovies([]);
-      let params = {
-        apikey: "faf7e5bb",
-        r: "json",
-      };
-
-      if (searchKey) params.s = searchKey;
-
       let res = await axios.get(baseURL, {
         params,
       });
 
-      if (res) {
-        setIsLoading(false);
-        dispatch(
-          setMovies(res.data?.Response === "True" ? res.data.Search : [])
-        );
+      if (res && res.data?.Response === "True") {
+        dispatch(setMovies(res.data.Search));
+        setViewComponent("DATA_FOUND");
+      } else if (
+        res.data?.Response === "False" &&
+        res.data?.Error === "Incorrect IMDb ID."
+      ) {
+        dispatch(setMovies([]));
+        setViewComponent("INIT_PAGE");
+      } else {
+        setViewComponent("DATA_EMPTY");
       }
     } catch (error) {
-      setIsLoading(false);
       throw error;
+    }
+  };
+
+  const refineSearch = () => {
+    if (searchKey) {
+      setParams({ ...params, s: searchKey });
     }
   };
 
   const handlePosterImage = (val) => {
     setSelectedPoster(val);
-    dispatch(showModal());
   };
-
-  console.log();
 
   return (
     <>
       <Modal
-        visible={selectedPoster !== null}
-        onCancel={() => setSelectedPoster(null)}
+        centered
         title={null}
         footer={null}
+        visible={selectedPoster !== null}
+        onCancel={() => setSelectedPoster(null)}
       >
         <img src={selectedPoster?.Poster} />
       </Modal>
-      <div ref={layoutRef}>
-        <Layout>
-          <Row align="middle" justify="space-between">
-            <Col span={12}>
-              <Typography.Title>OMDb Movie List</Typography.Title>
-            </Col>
-            <Col span={12}>
-              <SearchInput
-                justify="end"
-                onChange={(e) => setSearchKey(e.target.value)}
-                onButtonSubmit={loadMovies}
-              />
-            </Col>
-          </Row>
 
-          {!movies.length ? (
-            <></>
-          ) : (
-            <Row gutter={[16, 16]}>
-              {movies.map((each, i) => (
-                <Col span={24} key={i}>
-                  <MovieCard
-                    data={each}
-                    handlePosterImage={(val) => handlePosterImage(val)}
-                  />
-                </Col>
-              ))}
-            </Row>
-          )}
+      <div ref={layoutRef}>
+        <Layout
+          searchKey={searchKey}
+          viewComponent={viewComponent}
+          onButtonSubmit={refineSearch}
+          onChange={e => setSearchKey(e.target.value)}
+        >
+          <RenderViewComponent
+            searchKey={searchKey}
+            viewComponent={viewComponent}
+            onButtonSubmit={refineSearch}
+            onChange={e => setSearchKey(e.target.value)}
+            handlePosterImage={(val) => handlePosterImage(val)}
+            movies={movies}
+            isLoading={isLoading}
+          />
         </Layout>
       </div>
     </>
   );
+};
+
+const RenderViewComponent = ({
+  viewComponent,
+  searchKey,
+  onButtonSubmit,
+  onChange,
+  handlePosterImage,
+  movies,
+  isLoading,
+}) => {
+  if (viewComponent === "INIT_PAGE") {
+    return (
+      <LandingPage
+        searchKey={searchKey}
+        viewComponent={viewComponent}
+        onButtonSubmit={onButtonSubmit}
+        onChange={onChange}
+      />
+    );
+  } else if (viewComponent === "DATA_EMPTY") {
+    return <EmptyState />;
+  } else {
+    return (
+      <InfiniteScroll
+        isLoading={isLoading}
+        movies={movies}
+        handlePosterImage={(val) => handlePosterImage(val)}
+      />
+    );
+  }
 };
 
 export default App;
