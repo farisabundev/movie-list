@@ -10,7 +10,7 @@ const SearchInput = ({ justify, value, onChange, onButtonSubmit }) => {
   
   return (
     <Row className="movie-list-search-input_wrapper" justify={justify}>
-      <Col>
+      <Col flex="auto">
         <Input
           value={value}
           onChange={onChange}

@@ -16,6 +16,7 @@ import EmptyState from "./components/EmptyState";
 const App = () => {
   const [searchKey, setSearchKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadMore, setLoadMore] = useState(false);
   const [params, setParams] = useState({
     apikey: "faf7e5bb",
     r: "json",
@@ -28,21 +29,28 @@ const App = () => {
   const dispatch = useDispatch();
   const movies = useSelector((state) => state.movies.movies);
 
-  // refs
-  const layoutRef = useRef();
-
   useEffect(() => {
     loadMovies();
   }, [params]);
 
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const loadMovies = async () => {
+    setIsLoading(true);
+
     try {
       let res = await axios.get(baseURL, {
         params,
       });
 
       if (res && res.data?.Response === "True") {
-        dispatch(setMovies(res.data.Search));
+        let new_arr = [...movies, ...res.data.Search];
+
+        dispatch(setMovies(new_arr));
         setViewComponent("DATA_FOUND");
       } else if (
         res.data?.Response === "False" &&
@@ -53,7 +61,11 @@ const App = () => {
       } else {
         setViewComponent("DATA_EMPTY");
       }
+
+      setIsLoading(false);
+      setLoadMore(false);
     } catch (error) {
+      setIsLoading(false);
       throw error;
     }
   };
@@ -64,8 +76,28 @@ const App = () => {
     }
   };
 
+  const handleScroll = () => {
+    const scrollTop =
+      (document.documentElement && document.documentElement.scrollTop) ||
+      document.body.scrollTop;
+    const scrollHeight =
+      (document.documentElement && document.documentElement.scrollHeight) ||
+      document.body.scrollHeight;
+
+    setLoadMore(scrollTop + window.innerHeight + 0 >= scrollHeight);
+  };
+
+  useEffect(() => {
+    if (loadMore && !isLoading) {
+      let newPage = params.page + 1;
+      setParams({ ...params, page: newPage });
+    }
+  }, [loadMore]);
+
   const handlePosterImage = (val) => {
-    setSelectedPoster(val);
+    if (val.Poster !== "N/A") {
+      setSelectedPoster(val);
+    }
   };
 
   return (
@@ -80,21 +112,22 @@ const App = () => {
         <img src={selectedPoster?.Poster} />
       </Modal>
 
-      <div ref={layoutRef}>
+      <div>
         <Layout
           searchKey={searchKey}
           viewComponent={viewComponent}
           onButtonSubmit={refineSearch}
-          onChange={e => setSearchKey(e.target.value)}
+          onChange={(e) => setSearchKey(e.target.value)}
         >
           <RenderViewComponent
             searchKey={searchKey}
             viewComponent={viewComponent}
             onButtonSubmit={refineSearch}
-            onChange={e => setSearchKey(e.target.value)}
+            onChange={(e) => setSearchKey(e.target.value)}
             handlePosterImage={(val) => handlePosterImage(val)}
             movies={movies}
             isLoading={isLoading}
+            loadMore={loadMore}
           />
         </Layout>
       </div>
@@ -110,6 +143,7 @@ const RenderViewComponent = ({
   handlePosterImage,
   movies,
   isLoading,
+  loadMore,
 }) => {
   if (viewComponent === "INIT_PAGE") {
     return (
@@ -126,6 +160,7 @@ const RenderViewComponent = ({
     return (
       <InfiniteScroll
         isLoading={isLoading}
+        loadMore={loadMore}
         movies={movies}
         handlePosterImage={(val) => handlePosterImage(val)}
       />

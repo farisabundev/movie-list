@@ -3,14 +3,14 @@ import React from "react";
 
 import MovieCard from "./MovieCard";
 
-const InfiniteScroll = ({ movies, handlePosterImage }) => {
+const InfiniteScroll = ({ isLoading, loadMore, movies, handlePosterImage }) => {
   return (
     <Row gutter={[16, 16]}>
       {!movies.length ? (
         <></>
       ) : (
         movies.map((each, i) => (
-          <Col span={24} key={i} style={{marginTop: 20}}>
+          <Col span={24} key={i} style={{ marginTop: 20 }}>
             <MovieCard
               data={each}
               handlePosterImage={(val) => handlePosterImage(val)}
@@ -18,6 +18,8 @@ const InfiniteScroll = ({ movies, handlePosterImage }) => {
           </Col>
         ))
       )}
+
+      {loadMore && isLoading ? <div>Fetching...</div> : ""}
     </Row>
   );
 };
