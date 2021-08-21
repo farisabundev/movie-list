@@ -77,7 +77,7 @@ const App = () => {
   const refineSearch = () => {
     if (searchKey) {
       dispatch(setMovies([]));
-      
+
       setIsEndOfSearch(false);
       setParams({ ...params, s: searchKey, page: 1 });
       window.scrollTo(0, 0);

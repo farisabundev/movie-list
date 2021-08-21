@@ -2,12 +2,21 @@ import { Col, Row } from "antd";
 import React from "react";
 
 import MovieCard from "./MovieCard";
+import SkeletonFetching from "./SkeletonFetching";
 
-const InfiniteScroll = ({ isEndOfSearch, isLoading, loadMore, movies, handlePosterImage }) => {
+const InfiniteScroll = ({
+  isEndOfSearch,
+  isLoading,
+  loadMore,
+  movies,
+  handlePosterImage,
+}) => {
   return (
     <Row gutter={[16, 16]} className="movie-result-wrapper">
       {!movies.length ? (
-        <></>
+        <Col span={24} style={{ marginTop: 20 }}>
+          <SkeletonFetching />
+        </Col>
       ) : (
         movies.map((each, i) => (
           <Col span={24} key={i} style={{ marginTop: 20 }}>
@@ -19,7 +28,13 @@ const InfiniteScroll = ({ isEndOfSearch, isLoading, loadMore, movies, handlePost
         ))
       )}
 
-      {loadMore && isLoading ? <div>Fetching...</div> : ""}
+      {loadMore && isLoading && !isEndOfSearch ? (
+        <Col span={24} style={{ marginTop: 20 }}>
+          <SkeletonFetching />
+        </Col>
+      ) : (
+        ""
+      )}
       {/* {isEndOfSearch ? <div>No more data to load</div> : ""} */}
     </Row>
   );
