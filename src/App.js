@@ -92,7 +92,7 @@ const App = () => {
       (document.documentElement && document.documentElement.scrollHeight) ||
       document.body.scrollHeight;
 
-    setLoadMore(scrollTop + window.innerHeight + 0 >= scrollHeight);
+    setLoadMore(scrollTop + window.innerHeight >= scrollHeight);
   };
 
   useEffect(() => {
@@ -125,13 +125,13 @@ const App = () => {
           searchKey={searchKey}
           viewComponent={viewComponent}
           onButtonSubmit={refineSearch}
-          onChange={(e) => setSearchKey(e.target.value)}
+          onChange={(e) => setSearchKey(e)}
         >
           <RenderViewComponent
             searchKey={searchKey}
             viewComponent={viewComponent}
             onButtonSubmit={refineSearch}
-            onChange={(e) => setSearchKey(e.target.value)}
+            onChange={(e) => setSearchKey(e)}
             handlePosterImage={(val) => handlePosterImage(val)}
             movies={movies}
             isLoading={isLoading}

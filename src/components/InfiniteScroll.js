@@ -28,7 +28,7 @@ const InfiniteScroll = ({
         ))
       )}
 
-      {loadMore && isLoading && !isEndOfSearch ? (
+      {loadMore && !isEndOfSearch ? (
         <Col span={24} style={{ marginTop: 20 }}>
           <SkeletonFetching />
         </Col>
