@@ -3,9 +3,9 @@ import React from "react";
 
 import MovieCard from "./MovieCard";
 
-const InfiniteScroll = ({ isLoading, loadMore, movies, handlePosterImage }) => {
+const InfiniteScroll = ({ isEndOfSearch, isLoading, loadMore, movies, handlePosterImage }) => {
   return (
-    <Row gutter={[16, 16]}>
+    <Row gutter={[16, 16]} className="movie-result-wrapper">
       {!movies.length ? (
         <></>
       ) : (
@@ -20,6 +20,7 @@ const InfiniteScroll = ({ isLoading, loadMore, movies, handlePosterImage }) => {
       )}
 
       {loadMore && isLoading ? <div>Fetching...</div> : ""}
+      {/* {isEndOfSearch ? <div>No more data to load</div> : ""} */}
     </Row>
   );
 };

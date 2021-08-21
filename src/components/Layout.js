@@ -55,6 +55,14 @@ const Layout = ({
 
         {children}
       </Col>
+
+      {viewComponent === "INIT_PAGE" ? (
+        ""
+      ) : (
+        <Col span={24} className="movie-list-footer">
+          FOOTER GOES HERE
+        </Col>
+      )}
     </Row>
   );
 };

@@ -16,7 +16,8 @@ import EmptyState from "./components/EmptyState";
 const App = () => {
   const [searchKey, setSearchKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [loadMore, setLoadMore] = useState(false);
+  const [loadMore, setLoadMore] = useState(true);
+  const [isEndOfSearch, setIsEndOfSearch] = useState(false);
   const [params, setParams] = useState({
     apikey: "faf7e5bb",
     r: "json",
@@ -40,39 +41,46 @@ const App = () => {
   }, []);
 
   const loadMovies = async () => {
-    setIsLoading(true);
+    if (!isEndOfSearch) {
+      setIsLoading(true);
 
-    try {
-      let res = await axios.get(baseURL, {
-        params,
-      });
+      try {
+        let res = await axios.get(baseURL, {
+          params,
+        });
 
-      if (res && res.data?.Response === "True") {
-        let new_arr = [...movies, ...res.data.Search];
+        if (res && res.data?.Response === "True") {
+          let new_arr = [...movies, ...res.data.Search];
 
-        dispatch(setMovies(new_arr));
-        setViewComponent("DATA_FOUND");
-      } else if (
-        res.data?.Response === "False" &&
-        res.data?.Error === "Incorrect IMDb ID."
-      ) {
-        dispatch(setMovies([]));
-        setViewComponent("INIT_PAGE");
-      } else {
-        setViewComponent("DATA_EMPTY");
+          dispatch(setMovies(new_arr));
+          setViewComponent("DATA_FOUND");
+        } else if (
+          res.data?.Response === "False" &&
+          res.data?.Error === "Incorrect IMDb ID."
+        ) {
+          dispatch(setMovies([]));
+          setViewComponent("INIT_PAGE");
+        } else {
+          setViewComponent(movies.length ? "DATA_FOUND" : "DATA_EMPTY");
+          setIsEndOfSearch(true);
+        }
+
+        setIsLoading(false);
+        setLoadMore(false);
+      } catch (error) {
+        setIsLoading(false);
+        throw error;
       }
-
-      setIsLoading(false);
-      setLoadMore(false);
-    } catch (error) {
-      setIsLoading(false);
-      throw error;
     }
   };
 
   const refineSearch = () => {
     if (searchKey) {
-      setParams({ ...params, s: searchKey });
+      dispatch(setMovies([]));
+      
+      setIsEndOfSearch(false);
+      setParams({ ...params, s: searchKey, page: 1 });
+      window.scrollTo(0, 0);
     }
   };
 
@@ -128,6 +136,7 @@ const App = () => {
             movies={movies}
             isLoading={isLoading}
             loadMore={loadMore}
+            isEndOfSearch={isEndOfSearch}
           />
         </Layout>
       </div>
@@ -144,6 +153,7 @@ const RenderViewComponent = ({
   movies,
   isLoading,
   loadMore,
+  isEndOfSearch,
 }) => {
   if (viewComponent === "INIT_PAGE") {
     return (
@@ -159,6 +169,7 @@ const RenderViewComponent = ({
   } else {
     return (
       <InfiniteScroll
+        isEndOfSearch={isEndOfSearch}
         isLoading={isLoading}
         loadMore={loadMore}
         movies={movies}
