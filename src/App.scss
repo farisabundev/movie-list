@@ -34,7 +34,7 @@ body {
 }
 
 .movie-list-wrapper {
-  padding: 30px 0;
+  padding-top: 30px;
   min-height: 100vh;
 
   .centered-div {
@@ -43,6 +43,10 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+  }
+
+  .movie-result-wrapper {
+    min-height: 90vh;
   }
 
   .movie-card {
@@ -73,6 +77,12 @@ body {
       }
     }
   }
+
+  .movie-list-footer {
+    min-height: 300px;
+    margin-top: 30px;
+    background-color: #082032;
+  }
 }
 
 // override
@@ -84,4 +94,10 @@ body {
 .ant-modal-body {
   padding: 0 !important;
 }
-
+.ant-skeleton-element {
+  width: 100% !important;
+}
+.ant-skeleton-image {
+  width: 100% !important;
+  height: 166px !important;
+}
